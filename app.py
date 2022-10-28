@@ -5,6 +5,7 @@ import datetime
 import csv
 import time
 
+
 def menu():
     while True:
         print('''
@@ -67,7 +68,7 @@ def view_product(): #handle getting and displaying a product by its product_id
                          \nPlease, enter the ID number between
                          \r{id_options[0]} and {id_options[len(id_options)-1]}
                          \rfor the product you are looking 
-                         \rfor:-------------------->  ''')
+                         \rfor:  ''')
         id_chosen = clean_id(id_chosen, id_options)
         if type(id_chosen) == int:
             id_error = False
@@ -80,11 +81,11 @@ def view_product(): #handle getting and displaying a product by its product_id
 
 
 def add_product():
-    name = input("Enter product's name: ")
-    quantity = int(input("Enter the quantity: "))
+    name = input("Enter product's name:  ")
+    quantity = int(input("Enter the quantity:  "))
     price_error = True
     while price_error:
-        price = input('Enter price (ex. 12.44):  ')
+        price = input('Enter price (ex. $12.44):  ')
         price = clean_price(price)
         if type(price) == int:
             price_error = False
@@ -92,7 +93,21 @@ def add_product():
     session.add(new_product)
     session.commit()
     print('Product added!')
-    time.sleep(1.5)
+    time.sleep(2)
+
+
+def back_up():
+    header = ['ID ', 'product_name ', 'product_quantity ', 'product_price ', 'date_updated ']
+    with open('back_up_csv', 'w') as cvsfile:
+        writer = csv.writer(cvsfile)
+        writer.writerow(header)
+        prod = session.query(Product)
+        for prod in session.query(Product):
+            prod_list = []
+            prod_list = [prod.id, prod.product_name, prod.product_quantity, prod.product_price, prod.date_updated]
+            writer.writerow(prod_list)
+        print('Back Up done')
+        time.sleep(2)
 
 
 def add_csv():
@@ -119,7 +134,7 @@ def app():
         elif choice == 'a':
             add_product()
         elif choice == 'b':
-            pass
+            back_up()
         else: 
             print('Goodbye!')
             app_running = False
@@ -129,8 +144,9 @@ if __name__ == '__main__':
     Base.metadata.create_all(engine)
     app()
     #add_csv()
-    #clean_price('$2.47')
+    #clean_price('$2.44')
     #view_product()
     #clean_id('3', [1, 2, 3])
     #add_product()
+    #back_up()
     
