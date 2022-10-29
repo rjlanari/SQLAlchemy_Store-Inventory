@@ -1,4 +1,5 @@
-from sqlalchemy import Integer
+from tkinter.messagebox import NO
+from sqlalchemy import Integer, true
 from models import (Base, Product, 
                     session, engine)
 import datetime
@@ -44,12 +45,6 @@ def clean_id(id_string, option):
     try:
         product_id = int(id_string)
     except ValueError:
-        input('''
-            \n******** ID ERROR *********
-            \rThat ID does not exist.
-            \rPress Enter to try again.
-            \r **************************
-            ''')
         return
     else:
         if product_id in option:
@@ -72,6 +67,11 @@ def view_product(): #handle getting and displaying a product by its product_id
         id_chosen = clean_id(id_chosen, id_options)
         if type(id_chosen) == int:
             id_error = False
+        else: 
+            print('''\n****** ID ERROR *******
+                     \rThat ID does not exist.
+                     \rPlease, try again.
+                     \r***********************''')
     chosen_product = session.query(Product).filter(Product.id == id_chosen).first()
     print(f'''\nProduct ID: {chosen_product.id}
               \rName: {chosen_product.product_name} 
@@ -82,7 +82,15 @@ def view_product(): #handle getting and displaying a product by its product_id
 
 def add_product():
     name = input("Enter product's name:  ")
-    quantity = int(input("Enter the quantity:  "))
+    quantity_error = True
+    try:    
+        quantity = int(input("Enter the quantity:  "))
+    except ValueError:
+        input('''\n****** Quantity Error ******
+                 \rPlease enter a valid number.
+                 \rPress Enter to continue.
+                 \r**************************''')
+        return
     price_error = True
     while price_error:
         price = input('Enter price (ex. $12.44):  ')
@@ -90,6 +98,10 @@ def add_product():
         if type(price) == int:
             price_error = False
     new_product = Product(product_name=name, product_quantity= quantity, product_price = price, date_updated = datetime.date.today())
+    previous_entries = session.query(Product).filter(Product.product_name == new_product.product_name)
+    for row in previous_entries:
+        if row.date_updated != session.query(Product).order_by(Product.date_updated.desc()).first():
+            session.delete(row)
     session.add(new_product)
     session.commit()
     print('Product added!')
@@ -110,8 +122,9 @@ def back_up():
         time.sleep(2)
 
 
-def add_csv():
+def add_csv(): 
     with open('inventory.csv') as csvfile:
+        next(csvfile)  
         data = csv.reader(csvfile)
         for row in data:
             product_in_db = session.query(Product).filter(Product.product_name==row[0]).one_or_none()
@@ -142,11 +155,15 @@ def app():
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
-    app()
-    #add_csv()
-    #clean_price('$2.44')
+    
+    add_csv()
+    #app()
     #view_product()
-    #clean_id('3', [1, 2, 3])
     #add_product()
     #back_up()
     
+    # prod = session.query(Product).filter(Product.product_name == "Choco").count()
+    # print(prod)
+    #session.delete(prod)
+    #for p in session.query(Product):
+         #print(p)
