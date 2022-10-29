@@ -161,9 +161,6 @@ if __name__ == '__main__':
     #view_product()
     #add_product()
     #back_up()
-    
-    # prod = session.query(Product).filter(Product.product_name == "Choco").count()
-    # print(prod)
     #session.delete(prod)
     #for p in session.query(Product):
          #print(p)
