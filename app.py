@@ -110,7 +110,7 @@ def add_product():
 
 def back_up():
     header = ['ID ', 'product_name ', 'product_quantity ', 'product_price ', 'date_updated ']
-    with open('back_up_csv', 'w') as cvsfile:
+    with open('back_up_csv.csv', 'w') as cvsfile:
         writer = csv.writer(cvsfile)
         writer.writerow(header)
         prod = session.query(Product)
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     Base.metadata.create_all(engine)
     
     add_csv()
-    #app()
+    app()
     #view_product()
     #add_product()
     #back_up()
