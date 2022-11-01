@@ -81,7 +81,7 @@ def view_product(): #handle getting and displaying a product by its product_id
 
 
 def add_product():
-    name = input("Enter product's name:  ")
+    name = input("Enter product's name:  ")     
     quantity_error = True
     try:    
         quantity = int(input("Enter the quantity:  "))
@@ -94,17 +94,26 @@ def add_product():
     price_error = True
     while price_error:
         price = input('Enter price (ex. $12.44):  ')
-        price = clean_price(price)
-        if type(price) == int:
+        try:
+            price = clean_price(price)
             price_error = False
-    new_product = Product(product_name=name, product_quantity= quantity, product_price = price, date_updated = datetime.date.today())
-    previous_entries = session.query(Product).filter(Product.product_name == new_product.product_name)
-    for row in previous_entries:
-        if row.date_updated != session.query(Product).order_by(Product.date_updated.desc()).first():
-            session.delete(row)
-    session.add(new_product)
+        except IndexError:
+            input('''\n***** Price Error *****
+                    \rDon't forget the $ sign.
+                    \rPress Enter to continue.
+                    \r************************''')
+    previous_entry = session.query(Product).filter(Product.product_name == name).one_or_none()
+    if previous_entry == None:
+        new_product = Product(product_name=name, product_quantity= quantity, product_price = price, date_updated = datetime.date.today())
+        session.add(new_product)
+        print('Product Added!')
+        #session.query(Product).filter(Product.product_name == new_product.product_name)
+    else: 
+        previous_entry.product_quantity = quantity
+        previous_entry.product_price = price
+        previous_entry.date_updated = datetime.date.today()
+        print('Product Updated!')
     session.commit()
-    print('Product added!')
     time.sleep(2)
 
 
@@ -126,10 +135,12 @@ def add_csv():
     with open('inventory.csv') as csvfile:
         next(csvfile)  
         data = csv.reader(csvfile)
+        names = []
         for row in data:
             product_in_db = session.query(Product).filter(Product.product_name==row[0]).one_or_none()
             if product_in_db==None:
                 name = row[0]
+                names.append(name)
                 price = clean_price(row[1])
                 quantity = int(row[2])
                 date = clean_date(row[3])
@@ -156,11 +167,12 @@ def app():
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
     
-    add_csv()
-    app()
+    #add_csv()
+    #app()
     #view_product()
-    #add_product()
+    add_product()
     #back_up()
     #session.delete(prod)
-    #for p in session.query(Product):
-         #print(p)
+    
+    for p in session.query(Product):
+         print(p)
