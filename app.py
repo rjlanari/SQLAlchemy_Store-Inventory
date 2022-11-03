@@ -156,6 +156,12 @@ def add_csv():
                 date = clean_date(row[3])
                 new_product = Product(product_name=name, product_price=price,product_quantity=quantity, date_updated=date)
                 session.add(new_product)
+            else:
+                product_in_db.product_quantity = quantity
+                product_in_db.product_price = price
+                product_in_db.date_updated = datetime.date.today()
+        print('Product Updated!')
+                        
         session.commit()
 
 
