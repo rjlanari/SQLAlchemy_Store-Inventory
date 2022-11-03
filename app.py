@@ -28,7 +28,7 @@ def menu():
                 \rPress Enter to continue. ''')
 
 def clean_price(price_str): 
-    split_price = price_str.split('$')
+    split_price = price_str.split('$')    
     price_float = float(split_price[1])
     return int(price_float * 100)
 
@@ -38,7 +38,7 @@ def clean_date(date_str):
     month = int(split_date[0])
     day = int(split_date[1])
     year = int(split_date[2])
-    return datetime.date(year, month, day)
+    return datetime.datetime(year, month, day)
 
 
 def clean_id(id_string, option):
@@ -82,7 +82,6 @@ def view_product(): #handle getting and displaying a product by its product_id
 
 def add_product():
     name = input("Enter product's name:  ")     
-    quantity_error = True
     try:    
         quantity = int(input("Enter the quantity:  "))
     except ValueError:
@@ -97,17 +96,22 @@ def add_product():
         try:
             price = clean_price(price)
             price_error = False
-        except IndexError:
+        except IndexError: 
             input('''\n***** Price Error *****
                     \rDon't forget the $ sign.
                     \rPress Enter to continue.
                     \r************************''')
+        except ValueError:
+            input('''\n***** Price Error *****
+                    \rPlease, enter a number 
+                    \rwith dot instead of coma.
+                    \rPress Enter to continue.
+                    \r************************''')
     previous_entry = session.query(Product).filter(Product.product_name == name).one_or_none()
     if previous_entry == None:
-        new_product = Product(product_name=name, product_quantity= quantity, product_price = price, date_updated = datetime.date.today())
+        new_product = Product(product_name=name, product_quantity= quantity, product_price = price, date_updated = datetime.datetime.today())
         session.add(new_product)
         print('Product Added!')
-        #session.query(Product).filter(Product.product_name == new_product.product_name)
     else: 
         previous_entry.product_quantity = quantity
         previous_entry.product_price = price
@@ -118,14 +122,20 @@ def add_product():
 
 
 def back_up():
-    header = ['ID ', 'product_name ', 'product_quantity ', 'product_price ', 'date_updated ']
-    with open('back_up_csv.csv', 'w') as cvsfile:
+    header = ['product_name','product_price','product_quantity','date_updated']
+    with open('backup.csv', 'w') as cvsfile:
         writer = csv.writer(cvsfile)
         writer.writerow(header)
-        prod = session.query(Product)
         for prod in session.query(Product):
             prod_list = []
-            prod_list = [prod.id, prod.product_name, prod.product_quantity, prod.product_price, prod.date_updated]
+            price = '$'+ format(prod.product_price/100, '.2f')
+            split_date = str(prod.date_updated).split('-')
+            month = split_date[1]
+            day = split_date[2].split(' ')[0]
+            #timetime = split_date[2].split(' ')[1]
+            year = split_date[0]
+            date = f'{month}/{day}/{year}'
+            prod_list = [prod.product_name, price, prod.product_quantity, date]
             writer.writerow(prod_list)
         print('Back Up done')
         time.sleep(2)
@@ -167,12 +177,12 @@ def app():
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
     
-    #add_csv()
-    #app()
+    add_csv()
+    app()
     #view_product()
-    add_product()
+    #add_product()
     #back_up()
     #session.delete(prod)
     
     for p in session.query(Product):
-         print(p)
+          print(p)
