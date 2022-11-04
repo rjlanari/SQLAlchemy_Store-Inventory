@@ -190,5 +190,5 @@ if __name__ == '__main__':
     #back_up()
     #session.delete(prod)
     
-    for p in session.query(Product):
-          print(p)
+    #for p in session.query(Product):
+          #print(p)
