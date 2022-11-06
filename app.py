@@ -53,7 +53,7 @@ def clean_id(id_string, option):
             return
 
 
-def view_product(): #handle getting and displaying a product by its product_id
+def view_product(): 
     id_options = []
     for prod in session.query(Product):
         id_options.append(prod.id)
@@ -132,7 +132,6 @@ def back_up():
             split_date = str(prod.date_updated).split('-')
             month = split_date[1]
             day = split_date[2].split(' ')[0]
-            #timetime = split_date[2].split(' ')[1]
             year = split_date[0]
             date = f'{month}/{day}/{year}'
             prod_list = [prod.product_name, price, prod.product_quantity, date]
@@ -157,9 +156,10 @@ def add_csv():
                 new_product = Product(product_name=name, product_price=price,product_quantity=quantity, date_updated=date)
                 session.add(new_product)
             else:
-                product_in_db.product_quantity = int(row[2])
-                product_in_db.product_price = clean_price(row[1])
-                product_in_db.date_updated = clean_date(row[3])
+                if product_in_db.date_updated < clean_date(row[3]):
+                    product_in_db.product_quantity = int(row[2])
+                    product_in_db.product_price = clean_price(row[1])
+                    product_in_db.date_updated = clean_date(row[3])
         print('Product Updated!')
                         
         session.commit()
@@ -185,10 +185,4 @@ if __name__ == '__main__':
     
     add_csv()
     app()
-    #view_product()
-    #add_product()
-    #back_up()
-    #session.delete(prod)
     
-    #for p in session.query(Product):
-          #print(p)
